@@ -1,0 +1,203 @@
+<div class="detail-page">
+  <!-- Toast stack -->
+<div class="toast-wrapper">
+  <div
+    *ngFor="let t of toasts"
+    class="toast"
+    [ngClass]="[t.type, t.hide ? 'toast-hide' : '']">
+
+    <span>{{ t.message }}</span>
+
+    <button class="toast-close" (click)="closeToast(t.id)">
+      ✕
+    </button>
+  </div>
+</div>
+
+  <!-- 🔹 NAVBAR -->
+  <nav class="navbar">
+    <div class="container nav-content">
+
+      <div class="brand" (click)="goHome()">
+        <img src="assets/images/tb-logo.png" class="logo" alt="Clinic Logo" />
+        <span class="brand-name">Medcross TB Clinic</span>
+      </div>
+
+      <button
+        class="menu-toggle"
+        type="button"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen"
+        aria-label="Toggle menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="nav-actions" [class.open]="menuOpen">
+        <a routerLink="/welcome" class="switch-link active" aria-current="page" (click)="closeMenu()">Document Upload</a>
+        <a routerLink="/lead-prospect" class="switch-link" (click)="closeMenu()">Lead Prospect</a>
+        <a routerLink="/referrals" class="switch-link" (click)="closeMenu()">Referrals</a>
+        <button (click)="onLogout()" class="logout-btn">Logout</button>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- 🔹 BACK BUTTON ROW -->
+  <div class="container back-row">
+    <button class="back-btn" (click)="onBack()">
+      ← Back to Search
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading patient details...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && patient" class="container main-content">
+    <section class="intro-panel">
+      <h2>Document Upload</h2>
+    </section>
+
+    <div class="patient-info-card card">
+      <div class="patient-header">
+        <div class="patient-avatar-large">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div>
+          <h2>{{ patient.name }}</h2>
+          <p class="patient-id">Patient ID: {{ patient.id }}</p>
+        </div>
+      </div>
+      <div class="patient-info-grid">
+        <div class="info-item">
+          <p class="info-label">Phone Number</p>
+          <p class="info-value">{{ patient.phone || 'Not Available' }}</p>
+        </div>
+        <div class="info-item">
+          <p class="info-label">Age</p>
+          <p class="info-value">{{ patient.age || 'Not Available' }} years</p>
+        </div>
+        <div class="info-item">
+          <p class="info-label">Gender</p>
+          <p class="info-value">{{ patient.gender || 'Not Available' }}</p>
+        </div>
+        <div class="info-item">
+          <p class="info-label">Address</p>
+          <p class="info-value">{{ patient.address || 'Not Available' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="upload-card card">
+      <h3>Upload Test/Document</h3>
+
+      <div class="upload-form">
+        <div class="form-group">
+          <label>Test/Document Type <span class="required">*</span></label>
+          <div class="document-type-dropdown" [class.open]="documentTypeDropdownOpen" [class.disabled]="isSubmitting">
+            <button
+              type="button"
+              class="input-field document-type-select"
+              (click)="toggleDocumentTypeDropdown($event)"
+              [disabled]="isSubmitting"
+              [attr.aria-expanded]="documentTypeDropdownOpen"
+              aria-haspopup="listbox"
+            >
+              <span [class.placeholder]="!selectedDocumentTypeId">{{ selectedDocumentTypeLabel }}</span>
+              <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+
+            <div class="document-type-menu" *ngIf="documentTypeDropdownOpen" role="listbox">
+              <div
+                class="document-type-option"
+                role="option"
+                tabindex="0"
+                *ngFor="let doc of documentTypes"
+                [class.selected]="selectedDocumentTypeId === doc.row_Id.toString()"
+                (click)="selectDocumentType(doc, $event)"
+              >
+                {{ doc.type }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEW: Date Field -->
+        <div class="form-group">
+          <label>Document Date <span class="required"></span></label>
+          <input
+            type="date"
+            [(ngModel)]="preparedDate"
+            class="input-field"
+            [disabled]="isSubmitting"
+            [max]="getTodayDate()"
+          />
+          <p class="field-hint">Date defaults to today if not specified</p>
+        </div>
+
+        <div class="form-group">
+          <label>Remarks</label>
+          <textarea
+            [(ngModel)]="remarks"
+            class="input-field textarea-field"
+            rows="4"
+            placeholder="Enter any remarks or notes..."
+            [disabled]="isSubmitting"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Upload Document <span class="required">*</span></label>
+          <div class="file-upload-box">
+            <input
+              type="file"
+              (change)="onFileSelected($event)"
+              id="file-upload"
+              class="file-input"
+              accept=".pdf,.jpg,.jpeg,.png"
+              [disabled]="isSubmitting"
+            />
+            <label for="file-upload" class="file-upload-label">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <p class="upload-text">
+                {{ fileName || 'Click to upload or drag and drop' }}
+              </p>
+              <p class="upload-hint">PDF, JPG, PNG up to 10MB</p>
+            </label>
+          </div>
+        </div>
+
+        <button 
+          (click)="onSubmit()" 
+          class="btn btn-primary btn-full btn-submit"
+          [disabled]="isSubmitting"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <span *ngIf="!isSubmitting">Submit Document</span>
+          <span *ngIf="isSubmitting">Uploading...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>  

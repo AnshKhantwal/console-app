@@ -1,0 +1,331 @@
+<div class="lead-page">
+  <!-- Toast stack -->
+  <div class="toast-wrapper">
+    <div
+      *ngFor="let t of toasts"
+      class="toast"
+      [ngClass]="[t.type, t.hide ? 'toast-hide' : '']">
+
+      <span>{{ t.message }}</span>
+
+      <button class="toast-close" type="button" (click)="closeToast(t.id)">✕</button>
+    </div>
+  </div>
+
+  <!-- ═══ NAVBAR — matches welcome & patient-detail ═══ -->
+  <nav class="navbar">
+    <div class="container nav-content">
+      <div class="logo-wrap">
+        <img src="assets/images/tb-logo.png" alt="Clinic Logo" class="logo" />
+        <h1 class="nav-title">Medcross TB Clinic</h1>
+      </div>
+
+      <button
+        class="menu-toggle"
+        type="button"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen"
+        aria-label="Toggle menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="nav-actions" [class.open]="menuOpen">
+        <a routerLink="/welcome" class="switch-link" (click)="closeMenu()">Document Upload</a>
+        <a routerLink="/lead-prospect" class="switch-link active" aria-current="page" (click)="closeMenu()">
+          Lead Prospect
+        </a>
+        <a routerLink="/referrals" class="switch-link" (click)="closeMenu()">Referrals</a>
+        <button type="button" (click)="onLogout()" class="logout-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container page-body">
+    <section class="intro-panel">
+      <p class="eyebrow">Lead Prospect Workspace</p>
+      <h2>Lead Prospect</h2>
+      <p>Register and manage patient referrals with clear tracking and follow-up workflow.</p>
+    </section>
+
+    <!-- ═══ NEW REFERRAL FORM — Collapsible Card ═══ -->
+    <section class="section-card" [class.collapsed]="isFormCollapsed">
+      <div class="section-header" (click)="isFormCollapsed = !isFormCollapsed">
+        <div class="section-header-left">
+          <div class="section-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          </div>
+          <h3>New Referral</h3>
+        </div>
+        <div class="section-header-right">
+          <span class="collapse-hint" *ngIf="isFormCollapsed">Click to expand</span>
+          <span class="chevron-icon" [class.rotated]="isFormCollapsed">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+      </div>
+
+      <div class="section-body" *ngIf="!isFormCollapsed">
+        <!-- ── Step Tabs ── -->
+        <div class="step-tabs">
+          <button *ngFor="let step of formSteps; let i = index"
+            class="step-tab"
+            [class.active]="currentStep === i"
+            [class.completed]="currentStep > i"
+            [attr.aria-label]="'Step ' + (i + 1) + ': ' + step"
+            (click)="goToStep(i)">
+            <span class="step-num">
+              <svg *ngIf="currentStep > i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span *ngIf="currentStep <= i">{{ i + 1 }}</span>
+            </span>
+            <span class="step-text" [class.visible]="currentStep === i">{{ step }}</span>
+          </button>
+        </div>
+
+        <!-- ══ STEP 0: Patient Information ══ -->
+        <div class="step-content" *ngIf="currentStep === 0">
+          <div class="form-grid-2">
+            <div class="form-group" [class.has-error]="submittedPatientInfo && !form.patientName.trim()">
+              <label>Patient Name <span class="required">*</span></label>
+              <div class="input-wrapper">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input [(ngModel)]="form.patientName" type="text" placeholder="Enter full name" />
+              </div>
+              <span class="error-hint" *ngIf="submittedPatientInfo && !form.patientName.trim()">Patient name is required</span>
+            </div>
+
+            <div class="form-group" [class.has-error]="submittedPatientInfo && !form.gender">
+              <label>Gender <span class="required">*</span></label>
+              <div class="pill-group">
+                <label class="pill" *ngFor="let g of ['Male','Female','Other']"
+                  [class.selected]="form.gender === g">
+                  <input type="radio" name="gender" [(ngModel)]="form.gender" [value]="g" hidden />
+                  <svg *ngIf="g === 'Male'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="14" r="5"/><path d="M19 5l-4.5 4.5"/><path d="M15 5h4v4"/></svg>
+                  <svg *ngIf="g === 'Female'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="9" r="5"/><line x1="12" y1="14" x2="12" y2="22"/><line x1="9" y1="19" x2="15" y2="19"/></svg>
+                  <svg *ngIf="g === 'Other'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+                  {{ g }}
+                </label>
+              </div>
+              <span class="error-hint" *ngIf="submittedPatientInfo && !form.gender">Select gender</span>
+            </div>
+
+            <div class="form-group" [class.has-error]="submittedPatientInfo && !isAgeValid()">
+              <label>Age <span class="required">*</span></label>
+              <div class="input-wrapper">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input [(ngModel)]="form.age" type="number" min="1" max="150" placeholder="Enter age" />
+                <span class="input-suffix">yrs</span>
+              </div>
+              <span class="error-hint" *ngIf="submittedPatientInfo && !isAgeValid()">Enter a valid age (1-150)</span>
+            </div>
+
+            <div class="form-group" [class.has-error]="submittedPatientInfo && !isMobileValid()">
+              <label>Mobile Number <span class="required">*</span></label>
+              <div class="input-wrapper">
+                <span class="input-prefix">+91</span>
+                <input [(ngModel)]="form.mobileNumber" type="tel" placeholder="10-digit number" maxlength="10" />
+              </div>
+              <span class="error-hint" *ngIf="submittedPatientInfo && !isMobileValid()">Enter a valid 10-digit mobile number</span>
+            </div>
+
+            <div class="form-group">
+              <label>Alternate Mobile</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">+91</span>
+                <input [(ngModel)]="form.alternateMobileNumber" type="tel" placeholder="Optional" maxlength="10" />
+              </div>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <span></span>
+            <button class="btn btn-primary" (click)="goToStep(1)">
+              Continue
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ══ STEP 1: Address ══ -->
+        <div class="step-content" *ngIf="currentStep === 1">
+          <div class="form-grid-2">
+            <div class="form-group full-width" [class.has-error]="submittedAddress && !form.address.trim()">
+              <label>Address <span class="required">*</span></label>
+              <div class="input-wrapper">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <input [(ngModel)]="form.address" type="text" placeholder="Street address, locality" />
+              </div>
+              <span class="error-hint" *ngIf="submittedAddress && !form.address.trim()">Address is required</span>
+            </div>
+
+            <div class="form-group">
+              <label>PIN Code</label>
+              <div class="input-wrapper" [class.loading]="isPinLookupLoading">
+                <input [(ngModel)]="form.zipCode" type="text" placeholder="6-digit PIN" maxlength="6" (input)="onPinCodeInput()" />
+                <div class="spinner-sm" *ngIf="isPinLookupLoading"></div>
+              </div>
+              <span class="field-note" [class.error]="pinLookupError" [class.success]="!pinLookupError && pinLookupMessage" *ngIf="pinLookupMessage">
+                {{ pinLookupMessage }}
+              </span>
+            </div>
+
+            <div class="form-group" [class.has-error]="submittedAddress && !form.area.trim()">
+              <label>Area <span class="required">*</span></label>
+              <div class="input-wrapper">
+                <input [(ngModel)]="form.area" type="text" placeholder="Area / Colony" />
+              </div>
+              <span class="error-hint" *ngIf="submittedAddress && !form.area.trim()">Area is required</span>
+            </div>
+
+            <div class="form-group">
+              <label>City</label>
+              <div class="input-wrapper">
+                <input [(ngModel)]="form.city" type="text" placeholder="City" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>State</label>
+              <div class="input-wrapper">
+                <input [(ngModel)]="form.state" type="text" placeholder="State" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Country</label>
+              <div class="input-wrapper">
+                <input [(ngModel)]="form.country" type="text" placeholder="Country" />
+              </div>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button class="btn btn-ghost" (click)="goToStep(0)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              Back
+            </button>
+            <button class="btn btn-primary" (click)="goToStep(2)">
+              Continue
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ══ STEP 2: Clinical Details ══ -->
+        <div class="step-content" *ngIf="currentStep === 2">
+          <div class="form-grid-2">
+            <div class="form-group" [class.has-error]="submittedClinical && !form.practice">
+              <label>Practice <span class="required">*</span></label>
+              <select [(ngModel)]="form.practice" class="select-field">
+                <option value="">Select practice</option>
+                <option *ngFor="let item of practices" [value]="item">{{ item }}</option>
+              </select>
+              <span class="error-hint" *ngIf="submittedClinical && !form.practice">Select a practice</span>
+            </div>
+
+            <div class="form-group" [class.has-error]="submittedClinical && !form.referralSource">
+              <label>Referral Source <span class="required">*</span></label>
+              <select [(ngModel)]="form.referralSource" class="select-field">
+                <option value="">Select source</option>
+                <option *ngFor="let item of referralSources" [value]="item">{{ item }}</option>
+              </select>
+              <span class="error-hint" *ngIf="submittedClinical && !form.referralSource">Select referral source</span>
+            </div>
+
+            <div class="form-group" [class.has-error]="submittedClinical && !form.diseaseCondition">
+              <label>Disease / Condition <span class="required">*</span></label>
+              <select [(ngModel)]="form.diseaseCondition" class="select-field">
+                <option value="">Select condition</option>
+                <option *ngFor="let item of diseases" [value]="item">{{ item }}</option>
+              </select>
+              <span class="error-hint" *ngIf="submittedClinical && !form.diseaseCondition">Select a condition</span>
+            </div>
+
+            <div class="form-group" [class.has-error]="submittedClinical && !form.patientStatus">
+              <label>Patient Status <span class="required">*</span></label>
+              <div class="pill-group">
+                <label class="pill status-pill" *ngFor="let s of patientStatuses"
+                  [class.selected]="form.patientStatus === s"
+                  [attr.data-status]="s">
+                  <input type="radio" name="patientStatus" [(ngModel)]="form.patientStatus" [value]="s" hidden />
+                  {{ s }}
+                </label>
+              </div>
+              <span class="error-hint" *ngIf="submittedClinical && !form.patientStatus">Select patient status</span>
+            </div>
+
+            <div class="form-group" [class.has-error]="submittedClinical && !form.addedOn">
+              <label>Added On <span class="required">*</span></label>
+              <div class="input-wrapper">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input [(ngModel)]="form.addedOn" type="date" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Follow-up Date &amp; Time</label>
+              <div class="followup-row">
+                <div class="input-wrapper">
+                  <input [(ngModel)]="form.followUpDate" type="date" />
+                </div>
+                <select [(ngModel)]="form.followUpTime" class="select-field">
+                  <option value="">Time</option>
+                  <option *ngFor="let time of followUpTimes" [value]="time">{{ time }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label>Referral Note</label>
+              <textarea [(ngModel)]="form.referralNote" rows="3" class="textarea-field" placeholder="Additional notes about this referral..."></textarea>
+            </div>
+
+            <div class="form-group full-width">
+              <label>Upload Documents</label>
+              <div class="file-upload-box" (click)="fileInput.click()" (dragover)="$event.preventDefault()" (drop)="onDrop($event)">
+                <input #fileInput type="file" multiple (change)="onFilesSelected($event)" class="file-input" />
+                <label class="file-upload-label">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span class="upload-text" *ngIf="selectedFiles.length === 0">
+                    Drop files here or <strong>click to browse</strong>
+                  </span>
+                  <span class="upload-text upload-text-active" *ngIf="selectedFiles.length > 0">
+                    <strong>{{ selectedFiles.length }}</strong> file(s) selected
+                  </span>
+                  <span class="upload-hint">PDF, JPG, PNG up to 10MB each</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button class="btn btn-ghost" type="button" (click)="currentStep = 1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              Back
+            </button>
+            <div class="step-actions-end">
+              <button class="btn btn-outline" type="button" (click)="clearForm()">Clear</button>
+              <button class="btn btn-primary btn-lg" type="button" (click)="onSaveReferral()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Save Referral
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
