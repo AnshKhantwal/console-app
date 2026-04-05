@@ -1,6 +1,6 @@
 # Netlify configuration for proxying API requests during testing
 [build]
-  publish = "dist"
+  publish = "dist/patient-management/browser"
 
 [[redirects]]
   from = "/tbclinic/practice_core_api/api/*"
