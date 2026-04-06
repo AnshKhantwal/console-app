@@ -110,7 +110,34 @@
 }
 
 /* Password toggle */
-.password-wrapper { position: relative; }
+
+.password-wrapper {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 1.1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #0f9d8f;
+  font-size: .85rem;
+  cursor: pointer;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  z-index: 2;
+}
+
+@media (max-width: 640px) {
+  .toggle-password {
+    right: 0.7rem;
+    font-size: .9rem;
+    padding-left: 0.3rem;
+    padding-right: 0.3rem;
+  }
+}
 
 .toggle-password {
   background: none;
