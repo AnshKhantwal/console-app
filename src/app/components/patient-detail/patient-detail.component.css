@@ -95,12 +95,17 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  text-decoration: none;
+  background: none;
+  border: none;
   color: #2e4b5c;
-  border-radius: 9px;
-  padding: 0.58rem 0.72rem;
-  font-size: 0.94rem;
+  cursor: pointer;
+  font-size: 0.95rem;
   transition: background-color 0.2s ease, color 0.2s ease;
+  width: 100%;
+  text-align: left;
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  font-family: inherit;
 }
 
 .switch-link:hover,
@@ -115,12 +120,25 @@
 }
 
 .logout-btn {
-  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   background: none;
-  width: 100%;
+  border: none;
+  color: #2e4b5c;
+  font-size: 0.95rem;
   cursor: pointer;
-  font-family: inherit;
+  transition: color 0.2s;
+  width: 100%;
   text-align: left;
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  font-family: inherit;
+}
+
+.logout-btn:hover {
+  background: #edf4f4;
+  color: #153345;
 }
 
 .back-row {
